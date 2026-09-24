@@ -123,7 +123,10 @@ def print_exception_as_comment(
 def run(options: Options) -> int:
     arch: Arch
     if options.target.arch == Target.ArchEnum.MIPS:
-        if options.target.platform == Target.PlatformEnum.MIPSEE:
+        if options.target.platform in (
+            Target.PlatformEnum.MIPSEE,
+            Target.PlatformEnum.MIPSN32,
+        ):
             arch = MipseeArch()
         else:
             arch = MipsArch()

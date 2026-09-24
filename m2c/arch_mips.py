@@ -2119,15 +2119,16 @@ class MipseeArch(MipsArch):
                 param_type = param.type.decay()
                 reg: Optional[Register] = None
                 offset: Optional[int] = None
-                try:
+                if ind < 8:
                     if param_type.is_float():
-                        reg = float_regs.pop(0)
+                        reg = Register(f"f{12 + ind}")
                     else:
-                        reg = intptr_regs.pop(0)
-                except IndexError:
+                        reg = Register(f"a{ind}")
+                else:
                     # Stack variable
                     offset = stack_offset
-                    stack_offset += 4
+                    stack_offset += 8
+
                 known_slots.append(
                     AbiArgSlot(ArgLoc(offset, ind, reg), param_type, name=param.name)
                 )

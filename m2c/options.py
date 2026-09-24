@@ -39,6 +39,7 @@ class Target:
         MIPS = "mips"
         MIPSEL = "mipsel"
         MIPSEE = "mipsee"
+        MIPSN32 = "mipsn32"
         PPC = "ppc"
         ARM = "arm"
         GBA = "gba"
@@ -47,11 +48,12 @@ class Target:
 
         @property
         def arch(self) -> Target.ArchEnum:
-            if self == Target.PlatformEnum.MIPS:
-                return Target.ArchEnum.MIPS
-            elif self == Target.PlatformEnum.MIPSEL:
-                return Target.ArchEnum.MIPS
-            elif self == Target.PlatformEnum.MIPSEE:
+            if self in (
+                Target.PlatformEnum.MIPS,
+                Target.PlatformEnum.MIPSEL,
+                Target.PlatformEnum.MIPSEE,
+                Target.PlatformEnum.MIPSN32,
+            ):
                 return Target.ArchEnum.MIPS
             elif self == Target.PlatformEnum.PPC:
                 return Target.ArchEnum.PPC
