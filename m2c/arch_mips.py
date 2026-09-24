@@ -1186,7 +1186,7 @@ class MipsArch(Arch):
                 if store is not None:
                     s.store_memory(store, a.reg_ref(0))
 
-        elif mnemonic == "mtc1":
+        elif mnemonic in ("mtc1", "dmtc1"):
             # Floating point moving instruction, source first
             assert (
                 len(args) == 2
@@ -1671,6 +1671,7 @@ class MipsArch(Arch):
         "move.fictive": lambda a: a.reg(1),
         # Floating point moving instructions
         "mfc1": lambda a: a.reg(1),
+        "dmfc1": lambda a: a.reg(1),
         "mov.s": lambda a: a.reg(1),
         "mov.d": lambda a: as_f64(a.dreg(1)),
         # Conditional moves

@@ -1067,13 +1067,27 @@ class BinaryOp(Condition):
         )
 
     @staticmethod
+    def _propagate_enum(left: Expression, right: Expression) -> Tuple[Expression, Expression]:
+        left_uw = early_unwrap(left)
+        right_uw = early_unwrap(right)
+        left_enum = left_uw.type.data().enum
+        right_enum = right_uw.type.data().enum
+        if left_enum is not None and right_enum is None and isinstance(right_uw, Literal):
+            right = as_type(right, left_uw.type, silent=True)
+        elif right_enum is not None and left_enum is None and isinstance(left_uw, Literal):
+            left = as_type(left, right_uw.type, silent=True)
+        return left, right
+
+    @staticmethod
     def icmp(left: Expression, op: str, right: Expression) -> BinaryOp:
+        left, right = BinaryOp._propagate_enum(left, right)
         return BinaryOp(
             left=as_intptr(left), op=op, right=as_intptr(right), type=Type.boolean()
         )
 
     @staticmethod
     def scmp(left: Expression, op: str, right: Expression) -> BinaryOp:
+        left, right = BinaryOp._propagate_enum(left, right)
         return BinaryOp(
             left=as_sintish(left, silent=True),
             op=op,
@@ -1092,6 +1106,7 @@ class BinaryOp(Condition):
 
     @staticmethod
     def ucmp(left: Expression, op: str, right: Expression) -> BinaryOp:
+        left, right = BinaryOp._propagate_enum(left, right)
         return BinaryOp(
             left=as_uintish(left), op=op, right=as_uintish(right), type=Type.boolean()
         )

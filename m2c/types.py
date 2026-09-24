@@ -256,7 +256,9 @@ class Type:
         if sign != TypeData.ANY_SIGN:
             assert kind & TypeData.K_INTPTR
         if enum is not None:
-            assert kind == TypeData.K_INT
+            if not (kind & TypeData.K_INT):
+                return False
+            kind = TypeData.K_INT
         if x.ptr_to is not None and y.ptr_to is not None:
             if not x.ptr_to.unify(y.ptr_to, seen=seen):
                 return False
@@ -424,6 +426,7 @@ class Type:
                 kind=TypeData.K_ANYREG,
                 likely_kind=data.likely_kind,
                 size_bits=size_bits,
+                enum=data.enum,
             )
         )
 
@@ -1066,7 +1069,7 @@ class Type:
                     TypeData(
                         kind=TypeData.K_INT,
                         size_bits=32,
-                        sign=TypeData.SIGNED,
+                        sign=TypeData.ANY_SIGN,
                         enum=enum,
                     )
                 )
