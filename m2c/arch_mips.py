@@ -1216,15 +1216,16 @@ class MipsArch(Arch):
                     assert isinstance(reg, Register)
                     inputs.extend([reg, other_f64_reg(reg)])
                 outputs.append(other_f64_reg(args[0]))
-            elif mn_parts[0] in ("cvt", "trunc"):
-                # f64 conversion; either the input or output may be an f64
+            elif mn_parts[0] in ("cvt", "trunc", "round", "ceil", "floor"):
+                # f64 / int64 conversion; either the input or output may be an f64 or int64
                 assert len(args) == 2 and isinstance(args[1], Register)
-                if mn_parts[2] == "d":
+                if mn_parts[2] in ("d", "l"):
                     inputs = [args[1], other_f64_reg(args[1])]
                 else:
                     inputs = [args[1]]
-                if mn_parts[1] == "d":
+                if mn_parts[1] in ("d", "l"):
                     outputs.append(other_f64_reg(args[0]))
+
             elif mnemonic.startswith("l") and size is not None:
                 # Load instructions
                 assert len(args) == 2
@@ -1613,15 +1614,34 @@ class MipsArch(Arch):
         # Floating point conversions
         "cvt.d.s": lambda a: handle_convert(a.reg(1), Type.f64(), Type.f32()),
         "cvt.d.w": lambda a: handle_convert(a.reg(1), Type.f64(), Type.intish()),
+        "cvt.d.l": lambda a: handle_convert(a.dreg(1), Type.f64(), Type.s64()),
         "cvt.s.d": lambda a: handle_convert(a.dreg(1), Type.f32(), Type.f64()),
         "cvt.s.w": lambda a: handle_convert(a.reg(1), Type.f32(), Type.intish()),
+        "cvt.s.l": lambda a: handle_convert(a.dreg(1), Type.f32(), Type.s64()),
         "cvt.w.d": lambda a: handle_convert(a.dreg(1), Type.s32(), Type.f64()),
         "cvt.w.s": lambda a: handle_convert(a.reg(1), Type.s32(), Type.f32()),
+        "cvt.l.s": lambda a: handle_convert(a.reg(1), Type.s64(), Type.f32()),
+        "cvt.l.d": lambda a: handle_convert(a.dreg(1), Type.s64(), Type.f64()),
         "cvt.s.u.fictive": lambda a: handle_convert(a.reg(1), Type.f32(), Type.u32()),
         "cvt.u.d.fictive": lambda a: handle_convert(a.dreg(1), Type.u32(), Type.f64()),
         "cvt.u.s.fictive": lambda a: handle_convert(a.reg(1), Type.u32(), Type.f32()),
         "trunc.w.s": lambda a: handle_convert(a.reg(1), Type.s32(), Type.f32()),
         "trunc.w.d": lambda a: handle_convert(a.dreg(1), Type.s32(), Type.f64()),
+        "trunc.l.s": lambda a: handle_convert(a.reg(1), Type.s64(), Type.f32()),
+        "trunc.l.d": lambda a: handle_convert(a.dreg(1), Type.s64(), Type.f64()),
+        "round.w.s": lambda a: handle_convert(a.reg(1), Type.s32(), Type.f32()),
+        "round.w.d": lambda a: handle_convert(a.dreg(1), Type.s32(), Type.f64()),
+        "round.l.s": lambda a: handle_convert(a.reg(1), Type.s64(), Type.f32()),
+        "round.l.d": lambda a: handle_convert(a.dreg(1), Type.s64(), Type.f64()),
+        "ceil.w.s": lambda a: handle_convert(a.reg(1), Type.s32(), Type.f32()),
+        "ceil.w.d": lambda a: handle_convert(a.dreg(1), Type.s32(), Type.f64()),
+        "ceil.l.s": lambda a: handle_convert(a.reg(1), Type.s64(), Type.f32()),
+        "ceil.l.d": lambda a: handle_convert(a.dreg(1), Type.s64(), Type.f64()),
+        "floor.w.s": lambda a: handle_convert(a.reg(1), Type.s32(), Type.f32()),
+        "floor.w.d": lambda a: handle_convert(a.dreg(1), Type.s32(), Type.f64()),
+        "floor.l.s": lambda a: handle_convert(a.reg(1), Type.s64(), Type.f32()),
+        "floor.l.d": lambda a: handle_convert(a.dreg(1), Type.s64(), Type.f64()),
+
         # Bit arithmetic
         "ori": lambda a: handle_or(a.reg(1), a.u16_imm(2)),
         "and": lambda a: BinaryOp.int(a.reg(1), "&", a.reg(2)),
