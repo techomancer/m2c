@@ -92,10 +92,23 @@ def deref(
 
     # Struct member is being dereferenced.
 
-    # Cope slightly better with raw pointers.
-    if isinstance(var, Literal) and var.value % (2**16) == 0:
-        var = Literal(var.value + offset, type=var.type)
-        offset = 0
+    # Handle known hardware MMIO apertures
+    if isinstance(var, Literal):
+        if 0x10000 <= var.value < 0x20000:
+            offset += var.value - 0x10000
+            var = stack_info.global_info.address_of_gsym("HQ2_READ_FIFO")
+        elif 0x40000 <= var.value < 0x50000:
+            offset += var.value - 0x40000
+            var = stack_info.global_info.address_of_gsym("HQ2_FIFO")
+        elif 0x50000 <= var.value < 0x60000:
+            offset += var.value - 0x50000
+            var = stack_info.global_info.address_of_gsym("HQ2_FIFO_CI")
+        elif 0x60000 <= var.value < 0x70000:
+            offset += var.value - 0x60000
+            var = stack_info.global_info.address_of_gsym("HQ2_STATUS_PORT")
+        elif var.value % (2**16) == 0:
+            var = Literal(var.value + offset, type=var.type)
+            offset = 0
 
     # Handle large struct offsets or *(x + offset).
     uw_var = early_unwrap(var)
